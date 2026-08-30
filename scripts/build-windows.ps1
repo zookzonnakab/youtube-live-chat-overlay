@@ -87,7 +87,7 @@ if (-not $SkipLauncher) {
     if (-not (Test-Path "node_modules")) {
         npm install
     }
-    npx pkg . --targets node20-win-x64 --output (Join-Path $ReleaseDir "YouTubeLiveChat.exe")
+    npx pkg . --targets node18-win-x64 --output (Join-Path $ReleaseDir "YouTubeLiveChat.exe")
     Set-Location $Root
 }
 
@@ -96,7 +96,7 @@ $Iscc = @(
     "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
     "${env:ProgramFiles}\Inno Setup 6\ISCC.exe",
     "iscc"
-) | Where-Object { Test-Path $_ -or (Get-Command $_ -ErrorAction SilentlyContinue) } | Select-Object -First 1
+) | Where-Object { (Test-Path $_) -or (Get-Command $_ -ErrorAction SilentlyContinue) } | Select-Object -First 1
 
 if ($Iscc) {
     Write-Host "Building installer with Inno Setup..." -ForegroundColor Yellow
