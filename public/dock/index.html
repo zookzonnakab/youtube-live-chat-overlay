@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Live Chat Dashboard</title>
+  <link rel="stylesheet" href="/dock/dock.css" />
+</head>
+<body>
+  <!-- Setup Wizard -->
+  <div id="wizard" class="wizard hidden">
+    <div class="wizard-card">
+      <h1>ยินดีต้อนรับ</h1>
+      <p class="wizard-sub">ตั้งค่า YouTube Live Chat Overlay ใน 3 ขั้นตอน</p>
+
+      <div class="wizard-steps">
+        <div class="wizard-step active" data-step="1">
+          <span class="step-num">1</span>
+          <div>
+            <h3>เชื่อมต่อ YouTube</h3>
+            <p>วางลิงก์ช่องหรือไลฟ์</p>
+            <input type="text" id="wizard-url" placeholder="https://youtube.com/@channel หรือ watch?v=..." />
+            <button id="wizard-save" class="btn btn-primary">เชื่อมต่อ</button>
+            <p id="wizard-error" class="error-text"></p>
+          </div>
+        </div>
+        <div class="wizard-step" data-step="2">
+          <span class="step-num">2</span>
+          <div>
+            <h3>ตั้งค่า OBS</h3>
+            <p>เพิ่ม Browser Source 2 อัน ขนาด 1920×1080</p>
+            <div class="url-copy">
+              <code id="wizard-scroll-url"></code>
+              <button class="btn-copy" data-target="wizard-scroll-url">คัดลอก</button>
+            </div>
+            <div class="url-copy">
+              <code id="wizard-featured-url"></code>
+              <button class="btn-copy" data-target="wizard-featured-url">คัดลอก</button>
+            </div>
+            <div class="url-copy">
+              <code id="wizard-tts-url"></code>
+              <button class="btn-copy" data-target="wizard-tts-url">คัดลอก</button>
+            </div>
+            <p class="hint">เปิด "Control audio via OBS" สำหรับ TTS source</p>
+            <p class="hint">Custom CSS: <code>body { background-color: rgba(0,0,0,0); }</code></p>
+            <button id="wizard-next-2" class="btn btn-secondary">ถัดไป</button>
+          </div>
+        </div>
+        <div class="wizard-step" data-step="3">
+          <span class="step-num">3</span>
+          <div>
+            <h3>ทดสอบ Featured</h3>
+            <p>คลิกข้อความในแชทเพื่อแสดงบน overlay</p>
+            <button id="wizard-finish" class="btn btn-primary">เริ่มใช้งาน</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="dashboard" class="dashboard hidden">
+    <!-- Header -->
+    <header class="dash-header">
+      <div class="dash-header-left">
+        <h1>Live Chat Dashboard</h1>
+        <div id="status-badge" class="status-badge status-offline">ออฟไลน์</div>
+      </div>
+      <div class="system-indicators">
+        <span id="ind-ws" class="indicator" title="WebSocket">WS</span>
+        <span id="ind-chat" class="indicator" title="Chat Ingest">Chat</span>
+        <span id="ind-scroll" class="indicator" title="Scroll Overlay">Scroll</span>
+        <span id="ind-featured" class="indicator" title="Featured Overlay">Featured</span>
+        <span id="ind-tts" class="indicator" title="TTS Overlay">TTS</span>
+      </div>
+    </header>
+
+    <!-- Featured Preview Bar -->
+    <section id="featured-bar" class="featured-bar hidden">
+      <div class="featured-bar-label">กำลังแสดงบน Overlay</div>
+      <div class="featured-bar-content">
+        <img id="featured-bar-avatar" class="featured-bar-avatar hidden" src="" alt="" />
+        <div class="featured-bar-text">
+          <span id="featured-bar-user" class="featured-bar-user"></span>
+          <span id="featured-bar-msg" class="featured-bar-msg"></span>
+        </div>
+      </div>
+      <div class="featured-bar-actions">
+        <button id="btn-undo-featured" class="btn btn-sm" title="ย้อนกลับ">↩ ย้อนกลับ</button>
+        <button id="btn-clear-featured" class="btn btn-sm btn-danger">ล้าง</button>
+      </div>
+    </section>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <button id="btn-restart" class="btn btn-sm">รีสตาร์ทการเชื่อมต่อ</button>
+      <button id="btn-copy-scroll" class="btn btn-sm">คัดลอก URL Scroll</button>
+      <button id="btn-copy-featured" class="btn btn-sm">คัดลอก URL Featured</button>
+      <button id="btn-copy-tts" class="btn btn-sm">คัดลอก URL TTS</button>
+      <button id="btn-show-wizard" class="btn btn-sm">Setup Wizard</button>
+      <span class="quick-hint">คีย์ลัด: ↑↓ เลือก · Enter Featured · Esc ล้าง</span>
+    </div>
+
+    <div class="dash-grid">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <section class="panel">
+          <h2>เชื่อมต่อ YouTube</h2>
+          <label>
+            วางลิงก์ YouTube
+            <input type="text" id="youtube-url" placeholder="https://youtube.com/@channel" />
+          </label>
+          <details class="advanced-config">
+            <summary>ตั้งค่าขั้นสูง</summary>
+            <label>Channel ID <input type="text" id="channelId" /></label>
+            <label>Handle <input type="text" id="handle" placeholder="@channel" /></label>
+            <label>Live Video ID <input type="text" id="liveId" /></label>
+            <label>
+              โหมดแชท
+              <select id="chatType">
+                <option value="live">Live chat (ทุกข้อความ)</option>
+                <option value="top">Top chat (กรอง)</option>
+              </select>
+            </label>
+          </details>
+          <button id="btn-save-config" class="btn btn-primary">บันทึก & รีสตาร์ท</button>
+          <p id="status-error" class="error-text"></p>
+        </section>
+
+        <section class="panel">
+          <h2>ตั้งค่า Overlay</h2>
+          <label>ขนาดฟอนต์แชท <input type="range" id="scrollFontSize" min="12" max="28" value="18" /><span id="scrollFontSize-val">18px</span></label>
+          <label>จำนวนข้อความสูงสุด <input type="range" id="scrollMaxMessages" min="5" max="30" value="15" /><span id="scrollMaxMessages-val">15</span></label>
+          <label>ตำแหน่งแนวนอน
+            <select id="scrollPosition"><option value="right">ขวา</option><option value="left">ซ้าย</option></select>
+          </label>
+          <label>ตำแหน่งแนวตั้ง
+            <select id="scrollVertical"><option value="bottom">ล่าง</option><option value="middle">กลาง</option></select>
+          </label>
+          <label>ความโปร่งใสการ์ด Featured <input type="range" id="featuredOpacity" min="0.3" max="1" step="0.05" value="0.8" /><span id="featuredOpacity-val">0.8</span></label>
+          <label>ขนาดฟอนต์ Featured <input type="range" id="featuredFontSize" min="14" max="32" value="22" /><span id="featuredFontSize-val">22px</span></label>
+        </section>
+
+        <section class="panel">
+          <h2>TTS อ่านออกเสียง</h2>
+          <label class="checkbox-label"><input type="checkbox" id="ttsEnabled" /> เปิด TTS อ่านออกเสียง</label>
+          <label class="checkbox-label"><input type="checkbox" id="ttsMember" checked /> สมาชิก</label>
+          <label class="checkbox-label"><input type="checkbox" id="ttsSuperchat" checked /> Super Chat</label>
+          <label class="checkbox-label"><input type="checkbox" id="ttsMemberSuperchat" checked /> สมาชิก + Super Chat</label>
+          <label>ความเร็ว <input type="range" id="ttsRate" min="0.5" max="2" step="0.1" value="1" /><span id="ttsRate-val">1</span></label>
+          <label>ระดับเสียง <input type="range" id="ttsVolume" min="0.1" max="1" step="0.1" value="1" /><span id="ttsVolume-val">1</span></label>
+          <div class="tts-test-buttons">
+            <button class="btn btn-sm tts-test-btn" data-category="member">ทดสอบ สมาชิก</button>
+            <button class="btn btn-sm tts-test-btn" data-category="superchat">ทดสอบ Super Chat</button>
+            <button class="btn btn-sm tts-test-btn" data-category="member-superchat">ทดสอบ สมาชิก+SC</button>
+          </div>
+          <p id="tts-queue-status" class="tts-queue-status">คิว: 0 · ข้าม: 0</p>
+          <button id="btn-clear-tts-queue" class="btn btn-sm btn-danger">ล้างคิว TTS</button>
+        </section>
+
+        <section class="panel">
+          <h2>การแจ้งเตือน & Auto-Feature</h2>
+          <label class="checkbox-label"><input type="checkbox" id="soundEnabled" checked /> เปิดเสียงแจ้งเตือน</label>
+          <label class="checkbox-label"><input type="checkbox" id="soundSuperchat" checked /> เสียง Super Chat</label>
+          <label class="checkbox-label"><input type="checkbox" id="soundMember" checked /> เสียงสมาชิกใหม่</label>
+          <label>Auto-Feature คำ (คั่นด้วย comma)
+            <input type="text" id="autoFeatureKeywords" placeholder="คำถาม, ?, ช่วย" />
+          </label>
+        </section>
+
+        <section class="panel status-panel">
+          <h2>สถานะ</h2>
+          <p id="status-live">ไลฟ์: -</p>
+          <p id="status-liveId">Live ID: -</p>
+          <p id="status-count">ข้อความ: 0</p>
+        </section>
+      </aside>
+
+      <!-- Chat Feed -->
+      <main class="chat-main">
+        <div class="chat-toolbar">
+          <div class="tabs">
+            <button class="tab active" data-filter="all">ทั้งหมด</button>
+            <button class="tab" data-filter="member">สมาชิก</button>
+            <button class="tab" data-filter="superchat">Super Chat</button>
+          </div>
+          <input type="search" id="search-input" placeholder="ค้นหา username หรือข้อความ..." />
+        </div>
+        <div id="chat-feed" class="chat-feed"></div>
+      </main>
+
+      <!-- Preview Panel -->
+      <aside class="preview-panel">
+        <h2>Preview</h2>
+        <div class="preview-box">
+          <div class="preview-label">Scrolling Chat</div>
+          <div id="preview-scroll" class="preview-scroll"></div>
+        </div>
+        <div class="preview-box">
+          <div class="preview-label">Featured Chat</div>
+          <div id="preview-featured" class="preview-featured hidden">
+            <div class="preview-featured-label">CHAT</div>
+            <div class="preview-featured-header">
+              <img id="preview-f-avatar" class="preview-f-avatar hidden" src="" alt="" />
+              <span id="preview-f-user"></span>
+            </div>
+            <div id="preview-f-body" class="preview-f-body"></div>
+          </div>
+          <div id="preview-featured-empty" class="preview-empty">ยังไม่มี Featured</div>
+        </div>
+
+        <div class="history-panel">
+          <h3>ประวัติ Featured</h3>
+          <div id="featured-history" class="featured-history"></div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script src="/dock/dock.js"></script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Extract version from tag
+        id: version
+        shell: bash
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+
+      - name: Update version.json githubRepo
+        shell: pwsh
+        run: |
+          $v = Get-Content version.json | ConvertFrom-Json
+          $v.version = "${{ steps.version.outputs.VERSION }}"
+          $v.githubRepo = "${{ github.repository }}"
+          $v | ConvertTo-Json | Set-Content version.json
+
+      - name: Install Inno Setup
+        run: choco install innosetup -y
+
+      - name: Build release package
+        shell: pwsh
+        run: .\scripts\build-windows.ps1 -Version "${{ steps.version.outputs.VERSION }}"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release/app-v${{ steps.version.outputs.VERSION }}.zip
+            release/YouTubeLiveChat-Setup-${{ steps.version.outputs.VERSION }}.exe
+            release/YouTubeLiveChat.exe
+          generate_release_notes: true

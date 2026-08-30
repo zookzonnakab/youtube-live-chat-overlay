@@ -1,0 +1,10 @@
+node_modules/
+dist/
+data/config.json
+data/settings.json
+data/.server.pid
+.env
+*.log
+.DS_Store
+release/
+launcher/node_modules/

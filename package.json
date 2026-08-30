@@ -1,0 +1,28 @@
+{
+  "name": "youtube-live-chat-overlay",
+  "version": "1.0.0",
+  "description": "YouTube Live Chat Overlay for OBS with local server",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "build:windows": "powershell -ExecutionPolicy Bypass -File scripts/build-windows.ps1",
+    "launcher:dev": "node launcher/index.js"
+  },
+  "keywords": ["youtube", "live-chat", "obs", "overlay"],
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "ws": "^8.18.0",
+    "youtube-chat-next": "^3.1.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.10.5",
+    "@types/ws": "^8.5.13",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}

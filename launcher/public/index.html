@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YouTube Live Chat Overlay</title>
+  <link rel="stylesheet" href="/launcher.css" />
+</head>
+<body>
+  <div class="card">
+    <div class="logo">YouTube Live Chat Overlay</div>
+    <p class="subtitle">สำหรับ OBS — แชทไลฟ์ + Featured + TTS</p>
+
+    <div id="status-box" class="status-box checking">
+      <div id="status-icon" class="status-icon">⏳</div>
+      <div id="status-text" class="status-text">กำลังตรวจสอบอัปเดต...</div>
+      <div id="version-info" class="version-info"></div>
+      <div id="progress-bar" class="progress-bar hidden">
+        <div id="progress-fill" class="progress-fill"></div>
+      </div>
+    </div>
+
+    <button id="btn-update" class="btn btn-update hidden">อัปเดตเป็นเวอร์ชันล่าสุด</button>
+    <button id="btn-start" class="btn btn-start" disabled>เริ่มโปรแกรม</button>
+    <button id="btn-stop" class="btn btn-stop hidden">หยุดโปรแกรม</button>
+
+    <p id="hint" class="hint">ต้องอัปเดตเป็นเวอร์ชันล่าสุดก่อนจึงจะเริ่มได้</p>
+  </div>
+  <script src="/launcher.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+services:
+  live-chat:
+    build: .
+    ports:
+      - "43123:43123"
+    volumes:
+      - ./data:/app/data
+    env_file:
+      - .env
+    restart: unless-stopped
