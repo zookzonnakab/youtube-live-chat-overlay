@@ -24,19 +24,23 @@ Write-Host "Building version $AppVersion..." -ForegroundColor Cyan
 $versionJson.version = $AppVersion
 $versionJson | ConvertTo-Json | Set-Content "version.json"
 
-# Build main app
+# Install all deps and build
+Write-Host "Installing dependencies..." -ForegroundColor Yellow
+npm ci
+
 Write-Host "Building TypeScript..." -ForegroundColor Yellow
 npm run build
+
+if (-not (Test-Path "dist")) {
+    throw "Build failed: dist/ folder not found"
+}
 
 # Prepare release/app staging
 $AppDir = Join-Path $Root "release\app"
 if (Test-Path $AppDir) { Remove-Item $AppDir -Recurse -Force }
 New-Item -ItemType Directory -Path $AppDir -Force | Out-Null
 
-Write-Host "Installing production dependencies..." -ForegroundColor Yellow
-npm ci --omit=dev
-
-# Copy app files
+# Copy app files (without node_modules)
 Copy-Item "dist" -Destination $AppDir -Recurse
 Copy-Item "public" -Destination $AppDir -Recurse
 Copy-Item "package.json" -Destination $AppDir
@@ -45,9 +49,11 @@ Copy-Item "version.json" -Destination $AppDir
 Copy-Item ".env.example" -Destination $AppDir
 New-Item -ItemType Directory -Path (Join-Path $AppDir "data") -Force | Out-Null
 
-# Copy production node_modules (only needed modules)
-Write-Host "Copying node_modules..." -ForegroundColor Yellow
-Copy-Item "node_modules" -Destination $AppDir -Recurse
+# Install production-only dependencies inside app dir
+Write-Host "Installing production dependencies in app bundle..." -ForegroundColor Yellow
+Push-Location $AppDir
+npm ci --omit=dev
+Pop-Location
 
 # Create app zip for GitHub Release
 $ReleaseDir = Join-Path $Root "release"
