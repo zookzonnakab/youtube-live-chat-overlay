@@ -7,7 +7,7 @@
 
 #define MyAppName "YouTube Live Chat Overlay"
 #define MyAppPublisher "YouTube Live Chat Overlay"
-#define MyAppURL "https://github.com"
+#define MyAppURL "https://github.com/zookzonnakab/youtube-live-chat-overlay"
 #define MyAppExeName "YouTubeLiveChat.exe"
 
 [Setup]

@@ -14,7 +14,7 @@
 
 ### สำหรับผู้ใช้ Windows (แนะนำ)
 
-1. ดาวน์โหลด `YouTubeLiveChat-Setup-x.x.x.exe` จาก [GitHub Releases](https://github.com/YOUR_USERNAME/youtube-live-chat-overlay/releases)
+1. ดาวน์โหลด `YouTubeLiveChat-Setup-x.x.x.exe` จาก [GitHub Releases](https://github.com/zookzonnakab/youtube-live-chat-overlay/releases/latest)
 2. ติดตั้ง → ดับเบิลคลิก **YouTube Live Chat Overlay** บน Desktop
 3. Launcher จะเช็คอัปเดตอัตโนมัติ → กด **เริ่มโปรแกรม** เมื่อพร้อม
 
@@ -119,9 +119,6 @@ public/
   dock/         # control panel
 ```
 
-| TTS overlay | http://localhost:43123/overlay/tts |
-| Control Dock | http://localhost:43123/dock |
-
 ## Build & Release (สำหรับ Developer)
 
 ### ตั้งค่า GitHub Repo
@@ -129,8 +126,8 @@ public/
 แก้ไข `version.json`:
 ```json
 {
-  "version": "1.0.0",
-  "githubRepo": "YOUR_USERNAME/youtube-live-chat-overlay"
+  "version": "1.0.2",
+  "githubRepo": "zookzonnakab/youtube-live-chat-overlay"
 }
 ```
 
@@ -143,19 +140,19 @@ npm run build:windows
 
 ผลลัพธ์ใน `release/`:
 - `YouTubeLiveChat.exe` — Launcher (เช็คอัปเดต + เริ่มโปรแกรม)
-- `app-v1.0.0.zip` — ไฟล์อัปเดตสำหรับ GitHub Release
-- `YouTubeLiveChat-Setup-1.0.0.exe` — ตัวติดตั้ง
+- `app-v1.0.2.zip` — ไฟล์อัปเดตสำหรับ GitHub Release
+- `YouTubeLiveChat-Setup-1.0.2.exe` — ตัวติดตั้ง
 
 ### Publish Release อัตโนมัติ
 
 ```bash
-git tag v1.0.1
-git push origin v1.0.1
+git tag v1.0.2
+git push origin v1.0.2
 ```
 
 GitHub Actions จะ build และสร้าง Release พร้อมอัปโหลด:
-- `app-v1.0.1.zip` — Launcher ดาวน์โหลดเพื่ออัปเดต
-- `YouTubeLiveChat-Setup-1.0.1.exe` — ติดตั้งครั้งแรก
+- `app-v1.0.2.zip` — Launcher ดาวน์โหลดเพื่ออัปเดต
+- `YouTubeLiveChat-Setup-1.0.2.exe` — ติดตั้งครั้งแรก
 - `YouTubeLiveChat.exe` — Launcher standalone
 
 ### วิธีทำงาน Auto-Update
