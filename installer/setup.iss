@@ -1,13 +1,19 @@
-; Inno Setup script for YouTube Live Chat Overlay
+; Inno Setup script for Keybaht Live Chat
 ; Build with: iscc installer\setup.iss /DMyAppVersion=1.0.0
+;
+; Safety: keep install folder + AppId + exe names stable so updates/config keep working.
+; Only the DISPLAY name is "Keybaht Live Chat".
 
 #ifndef MyAppVersion
   #define MyAppVersion "1.0.0"
 #endif
 
-#define MyAppName "YouTube Live Chat Overlay"
-#define MyAppPublisher "YouTube Live Chat Overlay"
+#define MyAppName "Keybaht Live Chat"
+#define MyAppPublisher "Keybaht"
 #define MyAppURL "https://github.com/zookzonnakab/youtube-live-chat-overlay"
+; Technical install folder name — do not change (existing installs / paths)
+#define MyInstallDirName "YouTube Live Chat Overlay"
+; Keep exe/setup filenames stable for GitHub Release + auto-update
 #define MyAppExeName "YouTubeLiveChat.exe"
 
 [Setup]
@@ -15,10 +21,13 @@ AppId={{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
-DefaultDirName={localappdata}\{#MyAppName}
+AppPublisherURL={#MyAppURL}
+AppSupportURL={#MyAppURL}
+DefaultDirName={localappdata}\{#MyInstallDirName}
 DefaultGroupName={#MyAppName}
 OutputDir=..\release
 OutputBaseFilename=YouTubeLiveChat-Setup-{#MyAppVersion}
+SetupIconFile=app.ico
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
@@ -43,7 +52,7 @@ Source: "..\release\node\*"; DestDir: "{app}\node"; Flags: ignoreversion recurse
 Source: "..\release\app\*"; DestDir: "{app}\app"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
+Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\{#MyAppExeName}"
 Name: "{group}\Uninstall {#MyAppName}"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
@@ -53,6 +62,7 @@ Filename: "{app}\{#MyAppExeName}"; Description: "เปิด {#MyAppName}"; Fla
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}\app\data"
 Type: filesandordirs; Name: "{app}\app\node_modules"
+; Keep technical data folder name stable
 Type: filesandordirs; Name: "{localappdata}\YouTubeLiveChatOverlay"
 
 [Code]

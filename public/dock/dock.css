@@ -26,8 +26,31 @@ body {
   width: 100%;
 }
 
+.wizard-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.wizard-brand img {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #fff;
+  object-fit: contain;
+}
+
 .wizard-card h1 { font-size: 28px; margin-bottom: 8px; }
-.wizard-sub { color: #888; margin-bottom: 32px; }
+.wizard-sub { color: #888; margin: 0; }
+
+.dash-brand-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #fff;
+  object-fit: contain;
+}
 
 .wizard-steps { display: flex; flex-direction: column; gap: 24px; }
 
@@ -81,7 +104,12 @@ body {
   justify-content: space-between; margin-bottom: 16px;
 }
 
-.dash-header-left { display: flex; align-items: center; gap: 12px; }
+.dash-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .dash-header h1 { font-size: 22px; font-weight: 600; }
 
 .status-badge {

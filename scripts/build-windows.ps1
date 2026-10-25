@@ -1,4 +1,5 @@
-# Build Windows release package for YouTube Live Chat Overlay
+# Build Windows release package for Keybaht Live Chat
+# Keep exe/setup asset names as YouTubeLiveChat-* for update compatibility.
 # Usage: .\scripts\build-windows.ps1 [-Version "1.0.0"] [-SkipLauncher]
 
 param(
@@ -88,7 +89,7 @@ if (-not $SkipLauncher) {
     if (-not (Test-Path "node_modules")) {
         npm install
     }
-    npx pkg . --targets node18-win-x64 --output (Join-Path $ReleaseDir "YouTubeLiveChat.exe")
+    npx pkg . --targets node18-win-x64 --output (Join-Path $ReleaseDir "YouTubeLiveChat.exe") --icon (Join-Path $Root "branding\app.ico")
     Set-Location $Root
 }
 

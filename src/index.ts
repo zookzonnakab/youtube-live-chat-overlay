@@ -5,7 +5,7 @@ async function main(): Promise<void> {
   const port = ctx.configService.getConfig().port;
 
   ctx.server.listen(port, () => {
-    console.log(`YouTube Live Chat Overlay running on http://localhost:${port}`);
+    console.log(`Keybaht Live Chat running on http://localhost:${port}`);
     console.log(`  Scroll overlay:  http://localhost:${port}/overlay/scroll`);
     console.log(`  Featured overlay: http://localhost:${port}/overlay/featured`);
     console.log(`  Control dock:     http://localhost:${port}/dock`);

@@ -1,6 +1,8 @@
-# YouTube Live Chat Overlay
+# Keybaht Live Chat
 
-ระบบ YouTube Live Chat Overlay สำหรับ OBS ที่รันบนเครื่อง local ใช้ unofficial InnerTube API ผ่าน [youtube-chat-next](https://www.npmjs.com/package/youtube-chat-next)
+YouTube Live Chat Overlay สำหรับ OBS (แบรนด์ **Keybaht Live Chat**) รันบนเครื่อง local ใช้ unofficial InnerTube API ผ่าน [youtube-chat-next](https://www.npmjs.com/package/youtube-chat-next)
+
+> หมายเหตุเทคนิค: ชื่อไฟล์ติดตั้ง/อัปเดตยังใช้ `YouTubeLiveChat-*` และโฟลเดอร์ข้อมูล `%LOCALAPPDATA%\YouTubeLiveChatOverlay` เพื่อไม่ให้พังระบบอัปเดตเดิม
 
 ## คุณสมบัติ
 
