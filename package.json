@@ -28,6 +28,7 @@
     "@types/express": "^4.17.21",
     "@types/node": "^22.10.5",
     "@types/ws": "^8.5.13",
+    "rcedit": "^5.0.2",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3"
   }

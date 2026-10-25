@@ -89,8 +89,14 @@ if (-not $SkipLauncher) {
     if (-not (Test-Path "node_modules")) {
         npm install
     }
-    npx pkg . --targets node18-win-x64 --output (Join-Path $ReleaseDir "YouTubeLiveChat.exe") --icon (Join-Path $Root "branding\app.ico")
+    npx pkg . --targets node18-win-x64 --output (Join-Path $ReleaseDir "YouTubeLiveChat.exe")
     Set-Location $Root
+    # pkg does not embed Windows icons reliably — stamp with rcedit
+    $exePath = Join-Path $ReleaseDir "YouTubeLiveChat.exe"
+    $icoPath = Join-Path $Root "branding\app.ico"
+    Write-Host "Embedding app icon into launcher exe..." -ForegroundColor Yellow
+    node (Join-Path $Root "scripts\set-exe-icon.mjs") $exePath $icoPath
+    Copy-Item $icoPath (Join-Path $ReleaseDir "app.ico") -Force
 }
 
 # Build Inno Setup installer if available

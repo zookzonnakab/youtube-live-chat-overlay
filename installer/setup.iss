@@ -34,7 +34,7 @@ WizardStyle=modern
 ; Install under LocalAppData so config/updates work without admin
 PrivilegesRequired=lowest
 ArchitecturesInstallIn64BitMode=x64compatible
-UninstallDisplayIcon={app}\{#MyAppExeName}
+UninstallDisplayIcon={app}\app.ico
 CloseApplications=yes
 
 [Languages]
@@ -44,17 +44,18 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "สร้าง Shortcut บน Desktop"; GroupDescription: "Shortcuts:"; Flags: checkedonce
 
 [Files]
-; Launcher exe (built with pkg)
+; Launcher exe (built with pkg + rcedit icon)
 Source: "..\release\YouTubeLiveChat.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\release\app.ico"; DestDir: "{app}"; Flags: ignoreversion
 ; Node.js portable runtime
 Source: "..\release\node\*"; DestDir: "{app}\node"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; Application bundle
 Source: "..\release\app\*"; DestDir: "{app}\app"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\{#MyAppExeName}"
+Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\app.ico"
 Name: "{group}\Uninstall {#MyAppName}"; Filename: "{uninstallexe}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\app.ico"; Tasks: desktopicon
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "เปิด {#MyAppName}"; Flags: nowait postinstall skipifsilent
