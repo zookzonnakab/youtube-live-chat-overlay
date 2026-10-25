@@ -74,3 +74,25 @@ html, body {
 }
 
 .tts-card.hiding { animation: ttsOut 0.3s ease-in forwards; }
+
+.tts-unlock {
+  display: none;
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 22px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #111;
+  background: #fbbf24;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.tts-unlock.visible { display: block; }
+
+#tts-audio { display: none; }

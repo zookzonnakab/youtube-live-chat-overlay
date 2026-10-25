@@ -70,11 +70,12 @@ $NodeExe = Join-Path $NodeDir "node.exe"
 if (-not (Test-Path $NodeExe)) {
     Write-Host "Downloading Node.js portable..." -ForegroundColor Yellow
     New-Item -ItemType Directory -Path $NodeDir -Force | Out-Null
-    $nodeUrl = "https://nodejs.org/dist/v20.19.0/node-v20.19.0-win-x64.zip"
+    # Node 22+: Edge TTS WebSocket works; Node 20 often fails handshake
+    $nodeUrl = "https://nodejs.org/dist/v22.20.0/node-v22.20.0-win-x64.zip"
     $nodeZip = Join-Path $ReleaseDir "node-temp.zip"
     Invoke-WebRequest -Uri $nodeUrl -OutFile $nodeZip
     Expand-Archive -Path $nodeZip -DestinationPath $ReleaseDir -Force
-    $extracted = Join-Path $ReleaseDir "node-v20.19.0-win-x64"
+    $extracted = Join-Path $ReleaseDir "node-v22.20.0-win-x64"
     Copy-Item "$extracted\*" -Destination $NodeDir -Recurse
     Remove-Item $nodeZip -Force
     Remove-Item $extracted -Recurse -Force

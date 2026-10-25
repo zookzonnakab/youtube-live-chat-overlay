@@ -7,11 +7,18 @@
   <link rel="stylesheet" href="/overlay/tts.css" />
 </head>
 <body>
+  <button id="tts-unlock" class="tts-unlock" type="button">
+    คลิกครั้งเดียวเพื่อเปิดเสียง TTS
+  </button>
+
   <div id="tts-card" class="tts-card hidden">
     <div id="tts-category" class="tts-category"></div>
     <div id="tts-display" class="tts-display"></div>
     <div class="tts-progress"><div id="tts-progress-bar" class="tts-progress-bar"></div></div>
   </div>
+
+  <audio id="tts-audio" preload="auto"></audio>
+
   <script src="/overlay/overlay-client.js"></script>
   <script src="/overlay/tts.js"></script>
 </body>

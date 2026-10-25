@@ -1,9 +1,11 @@
 import { buildTtsTexts, getTtsCategory, shouldTts } from "../domain/ttsEvaluator";
 import type { NormalizedMessage, TtsCategory, TtsPlayPayload } from "../domain/types";
 import type { BroadcastService } from "./BroadcastService";
+import { EdgeTtsService } from "./EdgeTtsService";
 import type { SettingsService } from "./SettingsService";
 
 const MAX_QUEUE = 5;
+const PLAY_WATCHDOG_MS = 90_000;
 
 interface QueueItem {
   payload: TtsPlayPayload;
@@ -14,6 +16,9 @@ export class TtsQueueService {
   private playing = false;
   private skipped = 0;
   private playCounter = 0;
+  private advancing = false;
+  private watchdog: ReturnType<typeof setTimeout> | null = null;
+  private readonly edgeTts = new EdgeTtsService();
 
   constructor(
     private readonly broadcastService: BroadcastService,
@@ -24,6 +29,10 @@ export class TtsQueueService {
         this.onDone();
       }
     });
+  }
+
+  getAudioCacheDir(): string {
+    return this.edgeTts.getCacheDir();
   }
 
   getStatus() {
@@ -66,7 +75,7 @@ export class TtsQueueService {
     this.queue.push({ payload });
 
     if (!this.playing) {
-      this.playNext();
+      void this.playNext();
     } else {
       this.broadcastQueue();
     }
@@ -113,7 +122,7 @@ export class TtsQueueService {
 
     this.queue.unshift({ payload });
     if (!this.playing) {
-      this.playNext();
+      void this.playNext();
     } else {
       this.broadcastQueue();
     }
@@ -122,27 +131,63 @@ export class TtsQueueService {
   clearQueue(): void {
     this.queue = [];
     this.playing = false;
+    this.clearWatchdog();
     this.broadcastQueue();
   }
 
   private onDone(): void {
+    this.clearWatchdog();
     this.playing = false;
-    this.playNext();
+    void this.playNext();
   }
 
-  private playNext(): void {
-    const item = this.queue.shift();
-    if (!item) {
-      this.broadcastQueue();
-      return;
+  private clearWatchdog(): void {
+    if (this.watchdog) {
+      clearTimeout(this.watchdog);
+      this.watchdog = null;
     }
+  }
 
-    this.playing = true;
-    this.broadcastService.broadcast({
-      type: "tts:play",
-      payload: item.payload,
-    });
-    this.broadcastQueue();
+  private async playNext(): Promise<void> {
+    if (this.advancing) return;
+    this.advancing = true;
+
+    try {
+      const item = this.queue.shift();
+      if (!item) {
+        this.playing = false;
+        this.broadcastQueue();
+        return;
+      }
+
+      this.playing = true;
+      this.broadcastQueue();
+
+      try {
+        await this.edgeTts.synthesize(
+          item.payload.id,
+          item.payload.speechText,
+          item.payload.rate
+        );
+        const safeName = item.payload.id.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 80);
+        item.payload.audioUrl = `/api/tts/audio/${safeName}.mp3`;
+      } catch (err) {
+        console.error("Edge TTS failed, client will fall back to Web Speech:", err);
+      }
+
+      this.broadcastService.broadcast({
+        type: "tts:play",
+        payload: item.payload,
+      });
+
+      this.clearWatchdog();
+      this.watchdog = setTimeout(() => {
+        console.warn("TTS play watchdog fired — forcing next");
+        this.onDone();
+      }, PLAY_WATCHDOG_MS);
+    } finally {
+      this.advancing = false;
+    }
   }
 
   private broadcastQueue(): void {

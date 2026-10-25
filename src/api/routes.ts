@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import { Router, type Request, type Response } from "express";
 import { parseYoutubeUrl } from "../domain/youtubeUrlParser";
 import type { ConfigUpdatePayload, OverlaySettings, TtsCategory } from "../domain/types";
@@ -150,6 +152,21 @@ export function createApiRouter(
 
   router.get("/tts/queue", (_req: Request, res: Response) => {
     res.json(ttsQueueService.getStatus());
+  });
+
+  router.get("/tts/audio/:file", (req: Request, res: Response) => {
+    const file = path.basename(req.params.file || "");
+    if (!/^[a-zA-Z0-9_-]+\.mp3$/.test(file)) {
+      res.status(400).json({ error: "invalid file" });
+      return;
+    }
+    const full = path.join(ttsQueueService.getAudioCacheDir(), file);
+    if (!fs.existsSync(full)) {
+      res.status(404).json({ error: "not found" });
+      return;
+    }
+    res.setHeader("Cache-Control", "no-store");
+    res.sendFile(full);
   });
 
   router.post("/tts/test", (req: Request, res: Response) => {

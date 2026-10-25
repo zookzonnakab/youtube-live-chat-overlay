@@ -10,11 +10,17 @@
     "build:windows": "powershell -ExecutionPolicy Bypass -File scripts/build-windows.ps1",
     "launcher:dev": "node launcher/index.js"
   },
-  "keywords": ["youtube", "live-chat", "obs", "overlay"],
+  "keywords": [
+    "youtube",
+    "live-chat",
+    "obs",
+    "overlay"
+  ],
   "license": "MIT",
   "dependencies": {
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "node-edge-tts": "^1.2.11",
     "ws": "^8.18.0",
     "youtube-chat-next": "^3.1.0"
   },

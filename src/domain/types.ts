@@ -79,6 +79,8 @@ export interface TtsPlayPayload {
   rate: number;
   pitch: number;
   volume: number;
+  /** Server-generated MP3 (Edge TTS) — preferred for OBS/Chrome */
+  audioUrl?: string;
 }
 
 export interface TtsQueueStatus {
