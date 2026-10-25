@@ -80,23 +80,16 @@ export class ConfigService {
 
   updateConfig(payload: ConfigUpdatePayload): AppConfig {
     const stored = readStoredConfig();
+    const parsed = payload.youtubeUrl
+      ? parseYoutubeUrl(payload.youtubeUrl)
+      : {};
 
-    if (payload.youtubeUrl) {
-      const parsed = parseYoutubeUrl(payload.youtubeUrl);
-      if (parsed.liveId) stored.liveId = parsed.liveId;
-      if (parsed.channelId) stored.channelId = parsed.channelId;
-      if (parsed.handle) stored.handle = parsed.handle;
-    }
+    // Apply explicit fields first. Empty string = clear only when no URL
+    // was provided (URL values are applied afterward and win).
+    this.applyIdField(stored, "channelId", payload.channelId, parsed.channelId, !!payload.youtubeUrl);
+    this.applyIdField(stored, "liveId", payload.liveId, parsed.liveId, !!payload.youtubeUrl);
+    this.applyIdField(stored, "handle", payload.handle, parsed.handle, !!payload.youtubeUrl);
 
-    if (payload.channelId !== undefined) {
-      stored.channelId = payload.channelId.trim() || undefined;
-    }
-    if (payload.liveId !== undefined) {
-      stored.liveId = payload.liveId.trim() || undefined;
-    }
-    if (payload.handle !== undefined) {
-      stored.handle = payload.handle.trim() || undefined;
-    }
     if (payload.chatType !== undefined) {
       stored.chatType = payload.chatType;
     }
@@ -105,6 +98,26 @@ export class ConfigService {
     this.config = this.buildConfig();
     this.validateConfig(this.config);
     return this.getConfig();
+  }
+
+  private applyIdField(
+    stored: StoredConfig,
+    key: "channelId" | "liveId" | "handle",
+    fromPayload: string | undefined,
+    fromParsed: string | undefined,
+    hasYoutubeUrl: boolean
+  ): void {
+    if (fromPayload !== undefined && fromPayload.trim()) {
+      stored[key] = fromPayload.trim();
+      return;
+    }
+    if (fromParsed) {
+      stored[key] = fromParsed;
+      return;
+    }
+    if (fromPayload !== undefined && !fromPayload.trim() && !hasYoutubeUrl) {
+      stored[key] = undefined;
+    }
   }
 
   getLiveChatOptions(): YoutubeId | null {

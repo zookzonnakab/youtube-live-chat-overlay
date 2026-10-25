@@ -283,14 +283,19 @@
   }
 
   async function saveConfig(extra = {}) {
+    // Do not send empty ID fields — they used to wipe values parsed from youtubeUrl.
     const body = {
-      youtubeUrl: $("youtube-url").value,
-      channelId: $("channelId").value,
-      handle: $("handle").value,
-      liveId: $("liveId").value,
       chatType: $("chatType").value,
       ...extra,
     };
+    const youtubeUrl = (extra.youtubeUrl || $("youtube-url").value || "").trim();
+    if (youtubeUrl) body.youtubeUrl = youtubeUrl;
+    const channelId = $("channelId").value.trim();
+    const handle = $("handle").value.trim();
+    const liveId = $("liveId").value.trim();
+    if (channelId) body.channelId = channelId;
+    if (handle) body.handle = handle;
+    if (liveId) body.liveId = liveId;
 
     const res = await fetch("/api/config", {
       method: "PUT",
