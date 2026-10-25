@@ -100,6 +100,7 @@ body {
 
 .btn-start { background: #ff0000; color: white; }
 .btn-update { background: #f59e0b; color: #000; }
+.btn-open-dock { background: #2563eb; color: white; }
 .btn-stop { background: #333; color: #f1f1f1; }
 
 .btn.hidden { display: none; }

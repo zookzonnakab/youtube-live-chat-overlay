@@ -37,17 +37,21 @@ function render(data) {
 
   progressBar.classList.add("hidden");
 
+  const btnOpenDock = document.getElementById("btn-open-dock");
+
   if (data.serverRunning) {
     icon.textContent = "🟢";
     text.textContent = "โปรแกรมกำลังทำงาน";
     btnStart.classList.add("hidden");
+    btnOpenDock.classList.remove("hidden");
     btnStop.classList.remove("hidden");
     btnUpdate.classList.add("hidden");
-    hint.textContent = "Dashboard: http://localhost:43123/dock";
+    hint.textContent = "ปิดเบราว์เซอร์ไปแล้ว? กด “เปิด Dashboard อีกครั้ง” หรือดับเบิลคลิกไอคอนโปรแกรม";
     return;
   }
 
   btnStop.classList.add("hidden");
+  btnOpenDock.classList.add("hidden");
   btnStart.classList.remove("hidden");
 
   if (data.upToDate) {
@@ -82,6 +86,10 @@ document.getElementById("btn-start").addEventListener("click", async () => {
   btn.disabled = true;
   await fetch("/api/start", { method: "POST" });
   poll();
+});
+
+document.getElementById("btn-open-dock").addEventListener("click", async () => {
+  await fetch("/api/open-dashboard", { method: "POST" });
 });
 
 document.getElementById("btn-stop").addEventListener("click", async () => {

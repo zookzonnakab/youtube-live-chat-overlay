@@ -412,9 +412,41 @@ async function startServer() {
 
 function openBrowser(url) {
   try {
-    execSync(`start "" "${url}"`, { stdio: "ignore", shell: true });
+    // detached start is more reliable than execSync when reopening from a second instance
+    const child = spawn("cmd.exe", ["/c", "start", "", url], {
+      detached: true,
+      stdio: "ignore",
+      windowsHide: true,
+    });
+    child.unref();
   } catch {
-    // ignore
+    try {
+      execSync(`start "" "${url}"`, { stdio: "ignore", shell: true });
+    } catch {
+      // ignore
+    }
+  }
+}
+
+function reopenExistingInstance() {
+  openBrowser(`http://localhost:${LAUNCHER_PORT}`);
+  // If the app server is already running, reopen the dashboard too
+  if (isServerRunning()) {
+    openBrowser(`http://localhost:${APP_PORT}/dock`);
+  } else {
+    // pid file may be stale; still try dock — browser will show error page if down
+    // Prefer probing the port quickly via a no-op spawn delay
+    setTimeout(() => {
+      try {
+        const req = http.get(`http://127.0.0.1:${APP_PORT}/api/status`, () => {
+          openBrowser(`http://localhost:${APP_PORT}/dock`);
+        });
+        req.on("error", () => {});
+        req.setTimeout(800, () => req.destroy());
+      } catch {
+        // ignore
+      }
+    }, 200);
   }
 }
 
@@ -493,6 +525,20 @@ function startLauncherServer() {
       return;
     }
 
+    if (url.pathname === "/api/open-dashboard" && req.method === "POST") {
+      openBrowser(`http://localhost:${APP_PORT}/dock`);
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ ok: true }));
+      return;
+    }
+
+    if (url.pathname === "/api/open-launcher" && req.method === "POST") {
+      openBrowser(`http://localhost:${LAUNCHER_PORT}`);
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ ok: true }));
+      return;
+    }
+
     let filePath = path.join(p.publicDir, url.pathname === "/" ? "index.html" : url.pathname);
     if (!filePath.startsWith(p.publicDir)) {
       res.writeHead(403);
@@ -500,6 +546,17 @@ function startLauncherServer() {
       return;
     }
     serveStatic(filePath, res);
+  });
+
+  server.on("error", (err) => {
+    if (err && err.code === "EADDRINUSE") {
+      // Already running: reopen browser windows instead of failing silently
+      reopenExistingInstance();
+      setTimeout(() => process.exit(0), 600);
+      return;
+    }
+    console.error(err);
+    process.exit(1);
   });
 
   server.listen(LAUNCHER_PORT, () => {
