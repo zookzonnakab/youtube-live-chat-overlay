@@ -15,16 +15,18 @@ AppId={{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
-DefaultDirName={autopf}\{#MyAppName}
+DefaultDirName={localappdata}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 OutputDir=..\release
 OutputBaseFilename=YouTubeLiveChat-Setup-{#MyAppVersion}
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
-PrivilegesRequired=admin
+; Install under LocalAppData so config/updates work without admin
+PrivilegesRequired=lowest
 ArchitecturesInstallIn64BitMode=x64compatible
 UninstallDisplayIcon={app}\{#MyAppExeName}
+CloseApplications=yes
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -51,6 +53,7 @@ Filename: "{app}\{#MyAppExeName}"; Description: "เปิด {#MyAppName}"; Fla
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}\app\data"
 Type: filesandordirs; Name: "{app}\app\node_modules"
+Type: filesandordirs; Name: "{localappdata}\YouTubeLiveChatOverlay"
 
 [Code]
 function InitializeSetup(): Boolean;

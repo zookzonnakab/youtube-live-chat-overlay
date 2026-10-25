@@ -28,6 +28,27 @@ const state = {
 let serverProcess = null;
 let paths = null;
 
+function getUserDataDir() {
+  const base =
+    process.env.LOCALAPPDATA ||
+    path.join(process.env.USERPROFILE || "", "AppData", "Local");
+  const dir = path.join(base, "YouTubeLiveChatOverlay");
+  fs.mkdirSync(dir, { recursive: true });
+  return dir;
+}
+
+function isWritableDir(dir) {
+  try {
+    fs.mkdirSync(dir, { recursive: true });
+    const probe = path.join(dir, `.write-test-${process.pid}`);
+    fs.writeFileSync(probe, "ok");
+    fs.unlinkSync(probe);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function getPaths() {
   if (paths) return paths;
 
@@ -43,7 +64,9 @@ function getPaths() {
   const serverEntry = path.join(appDir, "dist", "index.js");
   const versionFile = path.join(appDir, "version.json");
   const publicDir = path.join(__dirname, "public");
-  const pidFile = path.join(appDir, "data", ".server.pid");
+  const userDataDir = getUserDataDir();
+  const pidFile = path.join(userDataDir, ".server.pid");
+  const serverLog = path.join(userDataDir, "server.log");
 
   paths = {
     installRoot,
@@ -52,7 +75,10 @@ function getPaths() {
     serverEntry,
     versionFile,
     publicDir,
+    userDataDir,
     pidFile,
+    serverLog,
+    installWritable: isWritableDir(installRoot),
   };
 
   return paths;
@@ -199,6 +225,13 @@ async function performUpdate() {
   state.updateMessage = "กำลังดาวน์โหลดอัปเดต...";
 
   try {
+    const p = getPaths();
+    if (!p.installWritable) {
+      throw new Error(
+        "โฟลเดอร์ติดตั้งเขียนไม่ได้ (มักติดตั้งใน Program Files) — ถอนการติดตั้งแล้วติดตั้งเวอร์ชันใหม่จาก GitHub Releases"
+      );
+    }
+
     const apiUrl = `https://api.github.com/repos/${state.githubRepo}/releases/latest`;
     const buf = await httpsGet(apiUrl);
     const release = JSON.parse(buf.toString());
@@ -208,9 +241,8 @@ async function performUpdate() {
       throw new Error("ไม่พบไฟล์อัปเดตใน GitHub Release");
     }
 
-    const p = getPaths();
-    const zipPath = path.join(p.installRoot, "update-temp.zip");
-    const extractDir = path.join(p.installRoot, "update-temp");
+    const zipPath = path.join(p.userDataDir, "update-temp.zip");
+    const extractDir = path.join(p.userDataDir, "update-temp");
 
     await stopServer();
     await httpsDownload(asset.browser_download_url, zipPath, (pct) => {
@@ -302,7 +334,10 @@ async function stopServer() {
 }
 
 async function startServer() {
-  if (!state.upToDate && state.updateAvailable) return;
+  if (!state.upToDate && state.updateAvailable) {
+    state.error = "ต้องอัปเดตก่อนจึงจะเริ่มได้";
+    return;
+  }
   if (isServerRunning()) {
     state.serverRunning = true;
     openBrowser(`http://localhost:${APP_PORT}/dock`);
@@ -314,21 +349,47 @@ async function startServer() {
     state.error = "ไม่พบไฟล์โปรแกรม — ลองติดตั้งใหม่";
     return;
   }
+  if (!fs.existsSync(p.nodeExe)) {
+    state.error = "ไม่พบ Node.js runtime — ลองติดตั้งใหม่";
+    return;
+  }
+
+  try {
+    fs.writeFileSync(p.serverLog, `--- start ${new Date().toISOString()} ---\n`);
+  } catch {
+    // ignore log write failure
+  }
+
+  const logFd = (() => {
+    try {
+      return fs.openSync(p.serverLog, "a");
+    } catch {
+      return "ignore";
+    }
+  })();
 
   serverProcess = spawn(p.nodeExe, [p.serverEntry], {
     cwd: p.appDir,
-    env: { ...process.env, APP_ROOT: p.appDir, PORT: String(APP_PORT) },
+    env: {
+      ...process.env,
+      APP_ROOT: p.appDir,
+      DATA_DIR: path.join(p.userDataDir, "data"),
+      PORT: String(APP_PORT),
+    },
     detached: false,
-    stdio: "ignore",
+    stdio: ["ignore", logFd, logFd],
     windowsHide: true,
   });
 
   fs.mkdirSync(path.dirname(p.pidFile), { recursive: true });
   fs.writeFileSync(p.pidFile, String(serverProcess.pid));
 
-  serverProcess.on("exit", () => {
+  serverProcess.on("exit", (code) => {
     serverProcess = null;
     state.serverRunning = false;
+    if (code && code !== 0) {
+      state.error = `เซิร์ฟเวอร์ปิดตัวเอง (code ${code}) — ดู log ที่ ${p.serverLog}`;
+    }
     try {
       fs.unlinkSync(p.pidFile);
     } catch {
@@ -337,7 +398,15 @@ async function startServer() {
   });
 
   state.serverRunning = true;
+  state.error = null;
   await sleep(1500);
+
+  if (!isServerRunning()) {
+    state.error = `เซิร์ฟเวอร์สตาร์ทไม่สำเร็จ — ดู log ที่ ${p.serverLog}`;
+    state.serverRunning = false;
+    return;
+  }
+
   openBrowser(`http://localhost:${APP_PORT}/dock`);
 }
 

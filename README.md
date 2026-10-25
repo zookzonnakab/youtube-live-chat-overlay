@@ -15,8 +15,11 @@
 ### สำหรับผู้ใช้ Windows (แนะนำ)
 
 1. ดาวน์โหลด `YouTubeLiveChat-Setup-x.x.x.exe` จาก [GitHub Releases](https://github.com/zookzonnakab/youtube-live-chat-overlay/releases/latest)
-2. ติดตั้ง → ดับเบิลคลิก **YouTube Live Chat Overlay** บน Desktop
+2. ติดตั้ง (ไม่ต้องเป็น Admin — ติดตั้งในโฟลเดอร์ผู้ใช้) → เปิดจาก Desktop
 3. Launcher จะเช็คอัปเดตอัตโนมัติ → กด **เริ่มโปรแกรม** เมื่อพร้อม
+4. ใน Dock วางลิงก์ช่อง YouTube / ไลฟ์ แล้วกดบันทึก — ถ้าไม่ใส่ลิงก์ แชทจะไม่ขึ้น
+
+> ถ้าเคยติดตั้ง v1.0.2 ใน `Program Files` ให้ถอนการติดตั้งก่อน แล้วติดตั้งใหม่ (เวอร์ชันเก่าเขียน config ไม่ได้เพราะสิทธิ์โฟลเดอร์)
 
 ### ด้วย Docker
 
@@ -126,7 +129,7 @@ public/
 แก้ไข `version.json`:
 ```json
 {
-  "version": "1.0.2",
+  "version": "1.0.3",
   "githubRepo": "zookzonnakab/youtube-live-chat-overlay"
 }
 ```
@@ -140,19 +143,19 @@ npm run build:windows
 
 ผลลัพธ์ใน `release/`:
 - `YouTubeLiveChat.exe` — Launcher (เช็คอัปเดต + เริ่มโปรแกรม)
-- `app-v1.0.2.zip` — ไฟล์อัปเดตสำหรับ GitHub Release
-- `YouTubeLiveChat-Setup-1.0.2.exe` — ตัวติดตั้ง
+- `app-v1.0.3.zip` — ไฟล์อัปเดตสำหรับ GitHub Release
+- `YouTubeLiveChat-Setup-1.0.3.exe` — ตัวติดตั้ง
 
 ### Publish Release อัตโนมัติ
 
 ```bash
-git tag v1.0.2
-git push origin v1.0.2
+git tag v1.0.3
+git push origin v1.0.3
 ```
 
 GitHub Actions จะ build และสร้าง Release พร้อมอัปโหลด:
-- `app-v1.0.2.zip` — Launcher ดาวน์โหลดเพื่ออัปเดต
-- `YouTubeLiveChat-Setup-1.0.2.exe` — ติดตั้งครั้งแรก
+- `app-v1.0.3.zip` — Launcher ดาวน์โหลดเพื่ออัปเดต
+- `YouTubeLiveChat-Setup-1.0.3.exe` — ติดตั้งครั้งแรก
 - `YouTubeLiveChat.exe` — Launcher standalone
 
 ### วิธีทำงาน Auto-Update
