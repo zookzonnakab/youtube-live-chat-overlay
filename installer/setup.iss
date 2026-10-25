@@ -62,8 +62,7 @@ Filename: "{app}\{#MyAppExeName}"; Description: "เปิด {#MyAppName}"; Fla
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}\app\data"
 Type: filesandordirs; Name: "{app}\app\node_modules"
-; Keep technical data folder name stable
-Type: filesandordirs; Name: "{localappdata}\YouTubeLiveChatOverlay"
+; Do NOT delete {localappdata}\YouTubeLiveChatOverlay — preserves config/settings across reinstalls
 
 [Code]
 function InitializeSetup(): Boolean;
