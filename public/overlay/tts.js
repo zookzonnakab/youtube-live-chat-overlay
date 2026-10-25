@@ -3,8 +3,11 @@
   const categoryEl = document.getElementById("tts-category");
   const displayEl = document.getElementById("tts-display");
   const progressBar = document.getElementById("tts-progress-bar");
-  const unlockBtn = document.getElementById("tts-unlock");
+  const unlockEl = document.getElementById("tts-unlock");
   const audioEl = document.getElementById("tts-audio");
+
+  const SILENT_WAV =
+    "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=";
 
   let ws = null;
   let speaking = false;
@@ -19,6 +22,7 @@
   };
 
   function getThaiVoice() {
+    if (typeof speechSynthesis === "undefined") return null;
     const voices = speechSynthesis.getVoices();
     return (
       voices.find((v) => v.lang.startsWith("th")) ||
@@ -71,7 +75,19 @@
     displayEl.textContent = payload.displayText;
   }
 
+  function showUnlock() {
+    unlockEl.classList.add("visible");
+  }
+
+  function hideUnlock() {
+    unlockEl.classList.remove("visible");
+  }
+
   function speakWithWebSpeech(payload) {
+    if (typeof speechSynthesis === "undefined") {
+      finishSpeak();
+      return;
+    }
     try {
       speechSynthesis.cancel();
     } catch (_) {}
@@ -86,65 +102,83 @@
 
     const estDuration = Math.max(payload.speechText.length * 80, 2500);
     startProgress(estDuration);
-
     utterance.onend = () => finishSpeak();
     utterance.onerror = () => finishSpeak();
     speechSynthesis.speak(utterance);
   }
 
-  function speakWithAudio(payload) {
+  async function playAudioElement() {
+    // 1) Normal play
+    try {
+      audioEl.muted = false;
+      await audioEl.play();
+      return true;
+    } catch (_) {}
+
+    // 2) Muted unlock then unmute (works in many Chromium/OBS builds)
+    try {
+      audioEl.muted = true;
+      await audioEl.play();
+      audioEl.muted = false;
+      return true;
+    } catch (_) {}
+
+    return false;
+  }
+
+  async function speakWithAudio(payload) {
     audioEl.pause();
     audioEl.removeAttribute("src");
     audioEl.volume = Math.min(Math.max(payload.volume ?? 1, 0), 1);
     audioEl.src = payload.audioUrl + "?t=" + Date.now();
 
-    const onMeta = () => {
-      const dur = Number.isFinite(audioEl.duration) && audioEl.duration > 0
-        ? audioEl.duration * 1000
-        : Math.max(payload.speechText.length * 80, 2500);
+    audioEl.onloadedmetadata = () => {
+      const dur =
+        Number.isFinite(audioEl.duration) && audioEl.duration > 0
+          ? audioEl.duration * 1000
+          : Math.max(payload.speechText.length * 80, 2500);
       startProgress(dur);
     };
-
-    audioEl.onloadedmetadata = onMeta;
     audioEl.onended = () => finishSpeak();
     audioEl.onerror = () => {
-      console.warn("audio play failed, falling back to Web Speech");
+      console.warn("audio error, fallback Web Speech");
       speakWithWebSpeech(payload);
     };
 
-    const playPromise = audioEl.play();
-    if (playPromise && typeof playPromise.then === "function") {
-      playPromise.catch(() => {
-        // Autoplay blocked — keep payload and wait for unlock click
-        pendingPayload = payload;
-        speaking = false;
-        unlockBtn.classList.add("visible");
-        unlockBtn.textContent = "คลิกเพื่อเล่นเสียง TTS";
-      });
+    const ok = await playAudioElement();
+    if (ok) {
+      audioUnlocked = true;
+      hideUnlock();
+      return;
     }
+
+    // Still blocked — need OBS Interact / one click
+    pendingPayload = payload;
+    speaking = false;
+    showUnlock();
   }
 
   function speak(payload) {
     if (speaking) {
-      try { speechSynthesis.cancel(); } catch (_) {}
-      try { audioEl.pause(); } catch (_) {}
+      try {
+        speechSynthesis.cancel();
+      } catch (_) {}
+      try {
+        audioEl.pause();
+      } catch (_) {}
     }
 
     speaking = true;
     showCard(payload);
 
     if (payload.audioUrl) {
-      speakWithAudio(payload);
+      void speakWithAudio(payload);
     } else {
       speakWithWebSpeech(payload);
     }
   }
 
   async function unlockAudio() {
-    unlockBtn.classList.remove("visible");
-    audioUnlocked = true;
-
-    // Unlock HTML5 audio + AudioContext for Chrome/OBS
     try {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
       if (ctx.state === "suspended") await ctx.resume();
@@ -156,13 +190,16 @@
     } catch (_) {}
 
     try {
-      audioEl.src =
-        "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=";
-      audioEl.volume = 0.01;
+      audioEl.muted = true;
+      audioEl.src = SILENT_WAV;
       await audioEl.play();
       audioEl.pause();
+      audioEl.muted = false;
       audioEl.removeAttribute("src");
     } catch (_) {}
+
+    audioUnlocked = true;
+    hideUnlock();
 
     if (pendingPayload) {
       const p = pendingPayload;
@@ -171,27 +208,39 @@
     }
   }
 
-  unlockBtn.addEventListener("click", () => {
-    void unlockAudio();
-  });
-
-  // OBS / some embeds allow gesture-less play after first load attempt
-  document.addEventListener(
-    "click",
-    () => {
+  function bindUnlock() {
+    const handler = () => {
+      void unlockAudio();
+    };
+    unlockEl.addEventListener("click", handler);
+    unlockEl.addEventListener("pointerdown", handler);
+    unlockEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") handler();
+    });
+    document.addEventListener("pointerdown", () => {
       if (!audioUnlocked) void unlockAudio();
-    },
-    { once: true }
-  );
+    });
+  }
+
+  async function tryAutoUnlock() {
+    try {
+      audioEl.muted = true;
+      audioEl.src = SILENT_WAV;
+      await audioEl.play();
+      audioEl.pause();
+      audioEl.muted = false;
+      audioEl.removeAttribute("src");
+      audioUnlocked = true;
+      hideUnlock();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
 
   function connect() {
     ws = window.OverlayClient.connect("tts", (data) => {
       if (data.type === "tts:play") {
-        if (!audioUnlocked && data.payload.audioUrl) {
-          // Try play anyway (OBS often allows); show unlock if blocked
-          speak(data.payload);
-          return;
-        }
         speak(data.payload);
       }
     });
@@ -201,11 +250,14 @@
     speechSynthesis.onvoiceschanged = () => getThaiVoice();
   }
 
-  // Show unlock hint briefly for Chrome users
-  unlockBtn.classList.add("visible");
-  setTimeout(() => {
-    if (audioUnlocked) unlockBtn.classList.remove("visible");
-  }, 8000);
-
+  bindUnlock();
   connect();
+
+  // Try silent unlock (no yellow button unless needed)
+  void tryAutoUnlock().then((ok) => {
+    if (!ok) {
+      // Keep unlock hidden until a play is actually blocked
+      hideUnlock();
+    }
+  });
 })();

@@ -582,6 +582,43 @@
   $("btn-copy-tts").addEventListener("click", () => copyText(`${baseUrl}/overlay/tts`));
   $("btn-show-wizard").addEventListener("click", () => { showWizard(); wizardGoTo(1); });
 
+  function openManual() {
+    $("manual-modal").classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeManual() {
+    $("manual-modal").classList.add("hidden");
+    document.body.style.overflow = "";
+  }
+
+  $("btn-show-manual").addEventListener("click", openManual);
+  $("btn-show-manual-header").addEventListener("click", openManual);
+  $("btn-close-manual").addEventListener("click", closeManual);
+  $("manual-modal").addEventListener("click", (e) => {
+    if (e.target === $("manual-modal")) closeManual();
+  });
+
+  document.querySelectorAll(".manual-nav-link").forEach((link) => {
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      const id = link.getAttribute("href")?.slice(1);
+      const target = id ? document.getElementById(id) : null;
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      document.querySelectorAll(".manual-nav-link").forEach((l) => l.classList.remove("active"));
+      link.classList.add("active");
+    });
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !$("manual-modal").classList.contains("hidden")) {
+      closeManual();
+      e.stopPropagation();
+    }
+  }, true);
+
   document.querySelectorAll(".tab").forEach((tab) => {
     tab.addEventListener("click", () => {
       document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));

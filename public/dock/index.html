@@ -64,6 +64,7 @@
       <div class="dash-header-left">
         <h1>Live Chat Dashboard</h1>
         <div id="status-badge" class="status-badge status-offline">ออฟไลน์</div>
+        <button id="btn-show-manual-header" class="btn btn-sm btn-manual" type="button">คู่มือ</button>
       </div>
       <div class="system-indicators">
         <span id="ind-ws" class="indicator" title="WebSocket">WS</span>
@@ -97,6 +98,7 @@
       <button id="btn-copy-featured" class="btn btn-sm">คัดลอก URL Featured</button>
       <button id="btn-copy-tts" class="btn btn-sm">คัดลอก URL TTS</button>
       <button id="btn-show-wizard" class="btn btn-sm">Setup Wizard</button>
+      <button id="btn-show-manual" class="btn btn-sm btn-manual">📖 คู่มือการใช้งาน</button>
       <span class="quick-hint">คีย์ลัด: ↑↓ เลือก · Enter Featured · Esc ล้าง</span>
     </div>
 
@@ -213,6 +215,250 @@
           <div id="featured-history" class="featured-history"></div>
         </div>
       </aside>
+    </div>
+  </div>
+
+  <!-- User Manual -->
+  <div id="manual-modal" class="manual-modal hidden" role="dialog" aria-modal="true" aria-labelledby="manual-title">
+    <div class="manual-shell">
+      <header class="manual-header">
+        <div>
+          <h2 id="manual-title">คู่มือการใช้งาน</h2>
+          <p class="manual-sub">YouTube Live Chat Overlay · โปรแกรม + OBS + FAQ</p>
+        </div>
+        <button id="btn-close-manual" class="btn btn-sm" type="button">ปิด</button>
+      </header>
+
+      <div class="manual-body">
+        <nav class="manual-nav" aria-label="สารบัญคู่มือ">
+          <a href="#m-overview" class="manual-nav-link">ภาพรวม</a>
+          <a href="#m-start" class="manual-nav-link">เริ่มต้นใช้งาน</a>
+          <a href="#m-dashboard" class="manual-nav-link">แดชบอร์ด</a>
+          <a href="#m-youtube" class="manual-nav-link">เชื่อมต่อ YouTube</a>
+          <a href="#m-overlays" class="manual-nav-link">Overlay คืออะไร</a>
+          <a href="#m-obs" class="manual-nav-link">ตั้งค่า OBS</a>
+          <a href="#m-obs-tts" class="manual-nav-link">OBS + TTS เสียงขึ้นไลฟ์</a>
+          <a href="#m-featured" class="manual-nav-link">ข้อความไฮไลท์</a>
+          <a href="#m-tts" class="manual-nav-link">TTS อ่านออกเสียง</a>
+          <a href="#m-faq" class="manual-nav-link">คำถามที่พบบ่อย</a>
+          <a href="#m-troubleshoot" class="manual-nav-link">แก้ปัญหา</a>
+          <a href="#m-urls" class="manual-nav-link">รายการ URL</a>
+        </nav>
+
+        <article class="manual-content">
+          <section id="m-overview" class="manual-section">
+            <h3>ภาพรวม</h3>
+            <p>โปรแกรมนี้ดึงแชทจาก YouTube Live มาแสดงบน OBS แบบโปร่งใส และมีระบบไฮไลท์ข้อความ + อ่านออกเสียง (TTS) สำหรับสมาชิก / Super Chat</p>
+            <ul>
+              <li><b>Launcher</b> — เปิดโปรแกรม เช็คอัปเดต แล้วกดเริ่ม</li>
+              <li><b>Dashboard (Dock)</b> — หน้าควบคุมที่เบราว์เซอร์ <code>http://localhost:43123/dock</code></li>
+              <li><b>Overlay</b> — หน้าสำหรับใส่ใน OBS เป็น Browser Source</li>
+            </ul>
+            <p>Port เริ่มต้น: <b>43123</b> (แอป) · Launcher: <b>43124</b></p>
+          </section>
+
+          <section id="m-start" class="manual-section">
+            <h3>เริ่มต้นใช้งาน</h3>
+            <ol>
+              <li>ติดตั้งจาก GitHub Releases (<code>YouTubeLiveChat-Setup-x.x.x.exe</code>)</li>
+              <li>ถ้าเคยติดใน Program Files เวอร์ชันเก่า ให้ถอนการติดตั้งก่อน แล้วติดใหม่ (ติดตั้งในโฟลเดอร์ผู้ใช้)</li>
+              <li>เปิด <b>YouTube Live Chat Overlay</b> จาก Desktop</li>
+              <li>รอสถานะอัปเดตเป็นเวอร์ชันล่าสุด → กด <b>เริ่มโปรแกรม</b></li>
+              <li>เบราว์เซอร์จะเปิด Dashboard อัตโนมัติ</li>
+              <li>วางลิงก์ไลฟ์ / ช่อง YouTube แล้วกดบันทึก</li>
+              <li>ตั้งค่า Browser Source ใน OBS ตามหมวด “ตั้งค่า OBS”</li>
+            </ol>
+            <div class="manual-callout">
+              ช่องต้องกำลังไลฟ์อยู่ ถึงจะมีแชทไหล — ถ้าไลฟ์จบแล้ว สถานะจะไม่ live
+            </div>
+          </section>
+
+          <section id="m-dashboard" class="manual-section">
+            <h3>แดชบอร์ด (Dock)</h3>
+            <p>หน้าที่ใช้ควบคุมระหว่างไลฟ์</p>
+            <ul>
+              <li><b>ไฟสถานะมุมบน</b> — WS / Chat / Scroll / Featured / TTS ติด = เชื่อมต่อแล้ว</li>
+              <li><b>รายการแชท</b> — คลิกข้อความเพื่อขึ้น Featured overlay</li>
+              <li><b>ค้นหา / แท็บกรอง</b> — กรองสมาชิก Super Chat</li>
+              <li><b>คีย์ลัด</b> — ↑↓ เลือก · Enter ไฮไลท์ · Esc ล้าง Featured</li>
+              <li><b>Setup Wizard</b> — ตัวช่วยตั้งค่าครั้งแรก</li>
+            </ul>
+          </section>
+
+          <section id="m-youtube" class="manual-section">
+            <h3>เชื่อมต่อ YouTube</h3>
+            <p>วิธีง่ายสุด: วางลิงก์ทั้งอันในช่อง “วางลิงก์ YouTube” แล้วกดบันทึก</p>
+            <table class="manual-table">
+              <thead><tr><th>ลิงก์ตัวอย่าง</th><th>ได้ค่า</th></tr></thead>
+              <tbody>
+                <tr><td><code>youtube.com/live/xxxxx</code></td><td>Live Video ID</td></tr>
+                <tr><td><code>youtube.com/watch?v=xxxxx</code></td><td>Live Video ID</td></tr>
+                <tr><td><code>youtube.com/@channel</code></td><td>Handle</td></tr>
+                <tr><td><code>youtube.com/channel/UC...</code></td><td>Channel ID</td></tr>
+              </tbody>
+            </table>
+            <p>ต้องมีอย่างน้อย 1 ค่า: <b>channelId</b> / <b>liveId</b> / <b>handle</b></p>
+            <div class="manual-callout warn">
+              ถ้าใส่แค่ช่อง URL แล้วช่อง Live ID ว่าง — เวอร์ชันใหม่จะแปลงจากลิงก์ให้อัตโนมัติแล้ว<br />
+              ถ้ายัง error ให้ใส่รหัสหลัง <code>/live/</code> หรือหลัง <code>v=</code> ในช่อง Live Video ID โดยตรง
+            </div>
+          </section>
+
+          <section id="m-overlays" class="manual-section">
+            <h3>Overlay คืออะไร</h3>
+            <ul>
+              <li><b>Scroll</b> — แชทไหลด้านข้าง พื้นหลังโปร่งใส</li>
+              <li><b>Featured</b> — การ์ดข้อความที่คุณเลือกไฮไลท์</li>
+              <li><b>TTS</b> — แสดงข้อความ + เล่นเสียงอ่าน (สมาชิก / Super Chat)</li>
+            </ul>
+            <p>Overlay ไม่ได้อ่านแชทเอง — ต้องให้โปรแกรมรันอยู่ และ OBS เปิด Browser Source ชี้ URL เหล่านี้</p>
+          </section>
+
+          <section id="m-obs" class="manual-section">
+            <h3>ตั้งค่า OBS (ทีละขั้น)</h3>
+            <h4>1) Scrolling Chat</h4>
+            <ol>
+              <li>Sources → <b>+</b> → <b>Browser</b></li>
+              <li>URL: <code>http://localhost:43123/overlay/scroll</code></li>
+              <li>Width <b>1920</b> · Height <b>1080</b></li>
+              <li>ติ๊ก Shutdown source when not visible</li>
+              <li>Custom CSS (ถ้าพื้นหลังดำ):</li>
+            </ol>
+            <pre class="manual-code">body { background-color: rgba(0,0,0,0); }</pre>
+
+            <h4>2) Featured Chat</h4>
+            <ol>
+              <li>เพิ่ม Browser อีกอัน</li>
+              <li>URL: <code>http://localhost:43123/overlay/featured</code></li>
+              <li>ขนาด 1920×1080 · CSS โปร่งใสเหมือนด้านบน</li>
+            </ol>
+
+            <h4>3) TTS Overlay</h4>
+            <ol>
+              <li>เพิ่ม Browser อีกอัน</li>
+              <li>URL: <code>http://localhost:43123/overlay/tts</code></li>
+              <li>ติ๊ก <b>Control audio via OBS</b> (ควบคุมเสียงผ่าน OBS)</li>
+              <li>ดูหมวดถัดไปเพื่อให้เสียงขึ้นไลฟ์</li>
+            </ol>
+
+            <h4>จัดลำดับ</h4>
+            <p>ลาก Browser ของแชทไว้ <b>บนสุด</b> ในรายการ Sources เพื่อให้ทับเกม/กล้อง</p>
+          </section>
+
+          <section id="m-obs-tts" class="manual-section">
+            <h3>OBS + TTS ให้เสียงขึ้นไลฟ์</h3>
+            <ol>
+              <li>Properties ของ Browser TTS → ติ๊ก <b>Control audio via OBS</b></li>
+              <li>เมนู <b>แก้ไข → คุณสมบัติเสียงขั้นสูง</b></li>
+              <li>แถวเว็บเบราว์เซอร์ TTS ตั้งการมอนิเตอร์เป็น <b>Monitor and Output</b>
+                <ul>
+                  <li><b>Monitoring Enabled / Monitor Only</b> = ได้ยินเอง แต่ <b>ไม่ออกไลฟ์</b></li>
+                  <li><b>Monitor and Output</b> = ได้ยิน + ขึ้นไลฟ์</li>
+                </ul>
+              </li>
+              <li>ติ๊ก Track 1 (แทร็กที่สตรีมใช้)</li>
+              <li>อย่ามิวต์ใน Mixer</li>
+            </ol>
+            <h4>ถ้ามีปุ่มเหลือง “เปิดเสียง” ใน TTS</h4>
+            <p>ใน OBS กดตรงพรีวิวไม่ได้ — ต้อง:</p>
+            <ol>
+              <li>คลิกขวา Browser TTS → <b>Interact</b></li>
+              <li>คลิกที่พื้นที่เหลืองในหน้าต่าง Interact</li>
+              <li>ปิด Interact แล้วทดสอบใหม่</li>
+            </ol>
+            <p>หรือคลิกขวา → <b>Refresh cache of current page</b> หลังอัปเดตโปรแกรม</p>
+          </section>
+
+          <section id="m-featured" class="manual-section">
+            <h3>ข้อความไฮไลท์ (Featured)</h3>
+            <ul>
+              <li>คลิกข้อความใน Dock → ขึ้นบน Featured overlay</li>
+              <li>กดล้าง / Esc เพื่อเอาออก</li>
+              <li>ย้อนกลับได้จากปุ่มในแถบ Featured</li>
+            </ul>
+            <div class="manual-callout">
+              การคลิกไฮไลท์ = แสดงบนจอเท่านั้น <b>ยังไม่อ่าน TTS</b><br />
+              TTS อ่านอัตโนมัติเฉพาะสมาชิก / Super Chat (ถ้าเปิดไว้)
+            </div>
+          </section>
+
+          <section id="m-tts" class="manual-section">
+            <h3>TTS อ่านออกเสียง</h3>
+            <ol>
+              <li>ใส่ Browser Source TTS ใน OBS</li>
+              <li>ใน Dock ติ๊ก <b>เปิด TTS อ่านออกเสียง</b></li>
+              <li>เลือกประเภท: สมาชิก / Super Chat / สมาชิก+SC</li>
+              <li>กดปุ่มทดสอบใน Dock เพื่อเช็คเสียง</li>
+            </ol>
+            <p>เวอร์ชันใหม่เล่นเสียงเป็นไฟล์ MP3 จากเซิร์ฟเวอร์ (ใช้กับ OBS ได้ดีกว่า Web Speech เดิม)</p>
+            <p>ไฟ TTS มุมบนต้องติด = OBS/เบราว์เซอร์เปิดหน้า TTS อยู่</p>
+          </section>
+
+          <section id="m-faq" class="manual-section">
+            <h3>คำถามที่พบบ่อย</h3>
+            <details class="manual-faq" open>
+              <summary>channelId / liveId / handle เอาจากไหน?</summary>
+              <p>ไม่ต้องหาเอง — วางลิงก์ YouTube ทั้งอัน ระบบแยกให้ หรือใส่รหัสวิดีโอ 11 ตัวใน Live Video ID</p>
+            </details>
+            <details class="manual-faq">
+              <summary>วางลิงก์แล้วขึ้น “ต้องระบุอย่างน้อย 1 ค่า”?</summary>
+              <p>เคยมีบั๊กช่องว่างทับค่าจาก URL — อัปเดตเป็นเวอร์ชันล่าสุด หรือใส่ Live ID โดยตรง เช่น <code>z_FFXCo3W8U</code></p>
+            </details>
+            <details class="manual-faq">
+              <summary>ทำไมบันทึก config ไม่ได้ / เหมือนไม่ทำงาน?</summary>
+              <p>เวอร์ชันเก่ติดตั้งใน Program Files เขียนไฟล์ไม่ได้ — ถอนติดตั้ง แล้วติดตั้งเวอร์ชันใหม่ใน LocalAppData</p>
+            </details>
+            <details class="manual-faq">
+              <summary>TTS อ่านแชททั่วไปไหม?</summary>
+              <p>ไม่ — อ่านเฉพาะสมาชิกและ Super Chat ตามที่ติ๊กไว้</p>
+            </details>
+            <details class="manual-faq">
+              <summary>ได้ยินในลำโพงแต่ไม่ออกไลฟ์?</summary>
+              <p>ตั้ง Monitoring เป็น Monitor and Output และอย่าใช้ Monitor Only / Monitoring Enabled</p>
+            </details>
+            <details class="manual-faq">
+              <summary>ใน Cursor มีเสียง แต่ Chrome/OBS ไม่มี?</summary>
+              <p>อัปเดตเวอร์ชันที่มี MP3 TTS · ใน OBS ใช้ Interact คลิกเปิดเสียงครั้งแรก · Refresh cache</p>
+            </details>
+            <details class="manual-faq">
+              <summary>ปุ่มเหลืองใน OBS กดไม่ได้?</summary>
+              <p>ปกติ — ต้องคลิกขวา Browser → Interact แล้วค่อยคลิกในหน้าต่างนั้น</p>
+            </details>
+          </section>
+
+          <section id="m-troubleshoot" class="manual-section">
+            <h3>แก้ปัญหา</h3>
+            <table class="manual-table">
+              <thead><tr><th>อาการ</th><th>วิธีแก้</th></tr></thead>
+              <tbody>
+                <tr><td>Dashboard เปิดไม่ได้</td><td>เปิด Launcher → เริ่มโปรแกรม · เช็คพอร์ต 43123</td></tr>
+                <tr><td>แชทไม่อัปเดต</td><td>ใส่ลิงก์ไลฟ์ที่กำลังสด · กดรีสตาร์ทการเชื่อมต่อ</td></tr>
+                <tr><td>Overlay ว่างใน OBS</td><td>โปรแกรมต้องรัน · URL ถูก · Refresh cache</td></tr>
+                <tr><td>พื้นหลังดำ</td><td>ใส่ Custom CSS โปร่งใส</td></tr>
+                <tr><td>ไฟ TTS ดับ</td><td>เปิด Browser TTS ใน OBS หรือเปิด URL ในเบราว์เซอร์</td></tr>
+                <tr><td>อัปเดตไม่ได้</td><td>อย่าติดใน Program Files · ติดตั้งเวอร์ชันใหม่จาก Releases</td></tr>
+              </tbody>
+            </table>
+            <p>Log ของเซิร์ฟเวอร์ (Windows): <code>%LOCALAPPDATA%\YouTubeLiveChatOverlay\server.log</code></p>
+            <p>Config: <code>%LOCALAPPDATA%\YouTubeLiveChatOverlay\data\</code></p>
+          </section>
+
+          <section id="m-urls" class="manual-section">
+            <h3>รายการ URL</h3>
+            <table class="manual-table">
+              <thead><tr><th>หน้า</th><th>URL</th></tr></thead>
+              <tbody>
+                <tr><td>Dashboard</td><td><code>http://localhost:43123/dock</code></td></tr>
+                <tr><td>Scroll overlay</td><td><code>http://localhost:43123/overlay/scroll</code></td></tr>
+                <tr><td>Featured overlay</td><td><code>http://localhost:43123/overlay/featured</code></td></tr>
+                <tr><td>TTS overlay</td><td><code>http://localhost:43123/overlay/tts</code></td></tr>
+                <tr><td>Launcher UI</td><td><code>http://localhost:43124</code></td></tr>
+                <tr><td>ดาวน์โหลด</td><td><a href="https://github.com/zookzonnakab/youtube-live-chat-overlay/releases/latest" target="_blank" rel="noopener">GitHub Releases</a></td></tr>
+              </tbody>
+            </table>
+          </section>
+        </article>
+      </div>
     </div>
   </div>
 

@@ -78,21 +78,32 @@ html, body {
 .tts-unlock {
   display: none;
   position: fixed;
-  top: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 20;
-  border: none;
-  border-radius: 999px;
-  padding: 12px 22px;
-  font-size: 15px;
-  font-weight: 600;
+  inset: 0;
+  z-index: 50;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  padding: 24px;
+  text-align: center;
   color: #111;
-  background: #fbbf24;
+  background: rgba(251, 191, 36, 0.92);
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  user-select: none;
+  pointer-events: auto;
 }
 
-.tts-unlock.visible { display: block; }
+.tts-unlock.visible { display: flex; }
 
-#tts-audio { display: none; }
+.tts-unlock-title {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.tts-unlock-body {
+  font-size: 15px;
+  line-height: 1.5;
+  max-width: 420px;
+}
+
+#tts-audio { position: absolute; width: 0; height: 0; opacity: 0; pointer-events: none; }
